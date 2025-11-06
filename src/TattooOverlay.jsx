@@ -2,17 +2,15 @@ import React, { useState, useRef, useEffect } from "react";
 import { Stage, Layer, Image as KonvaImage, Transformer } from "react-konva";
 import useImage from "use-image";
 
-// Caminhos das tatuagens
 const URL_TATTOOS = [
-  "/tattoos/tattoo1.png",
-  "/tattoos/tattoo2.png",
-  "/tattoos/tattoo3.png",
-  "/tattoos/tattoo4.png",
+  `${process.env.PUBLIC_URL}/tattoos/tattoo1.png`,
+  `${process.env.PUBLIC_URL}/tattoos/tattoo2.png`,
+  `${process.env.PUBLIC_URL}/tattoos/tattoo3.png`,
+  `${process.env.PUBLIC_URL}/tattoos/tattoo4.png`,
 ];
 
-// ---------------- Tatuagem arrastável e transformável ---------------- //
 function DraggableTattoo({ src, isSelected, onSelect, controls }) {
-  const [image] = useImage(src);
+  const [image] = useImage(src, "anonymous");
   const shapeRef = useRef();
   const trRef = useRef();
   const [attrs, setAttrs] = useState({ x: 200, y: 200 });
@@ -32,7 +30,7 @@ function DraggableTattoo({ src, isSelected, onSelect, controls }) {
         x={attrs.x}
         y={attrs.y}
         scaleX={controls.scale}
-        scaleY={controls.scaleY || controls.scale}
+        scaleY={controls.scale}
         rotation={controls.rotation}
         opacity={controls.opacity}
         draggable
@@ -46,7 +44,7 @@ function DraggableTattoo({ src, isSelected, onSelect, controls }) {
         <Transformer
           ref={trRef}
           rotateEnabled={true}
-          keepRatio={false} // 🔥 permite deformar livremente (modo GIMP)
+          keepRatio={false}
           enabledAnchors={[
             "top-left",
             "top-right",
@@ -67,19 +65,11 @@ function DraggableTattoo({ src, isSelected, onSelect, controls }) {
   );
 }
 
-// ---------------- Imagem do corpo ---------------- //
-function BodyImage({ imageURL, stageSize }) {
+function BodyImage({ imageURL }) {
   const [image] = useImage(imageURL);
-  return (
-    <KonvaImage
-      image={image}
-      width={stageSize.width}
-      height={stageSize.height}
-    />
-  );
+  return <KonvaImage image={image} width={500} height={600} />;
 }
 
-// ---------------- Componente principal ---------------- //
 export default function TattooOverlay() {
   const [bodyImage, setBodyImage] = useState(null);
   const [tattoos, setTattoos] = useState([]);
@@ -91,22 +81,6 @@ export default function TattooOverlay() {
   });
 
   const stageRef = useRef();
-  const [stageSize, setStageSize] = useState({
-    width: window.innerWidth * 0.6,
-    height: window.innerHeight * 0.7,
-  });
-
-  // Atualiza tamanho do canvas ao redimensionar
-  useEffect(() => {
-    const handleResize = () => {
-      setStageSize({
-        width: window.innerWidth * 0.6,
-        height: window.innerHeight * 0.7,
-      });
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const handleBodyUpload = (e) => {
     const file = e.target.files[0];
@@ -142,68 +116,45 @@ export default function TattooOverlay() {
   };
 
   return (
-    <div
-      style={{
-        padding: 20,
-        fontFamily: "sans-serif",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 20,
-      }}
-    >
+    <div style={{ padding: 20, fontFamily: "sans-serif" }}>
       <h2>🎨 Estúdio Virtual de Tatuagem</h2>
 
       {!bodyImage && (
-        <label
-          style={{
-            background: "#444",
-            color: "#fff",
-            padding: "10px 20px",
-            borderRadius: "8px",
-            cursor: "pointer",
-          }}
-        >
-          📸 Carregar corpo
-          <input
-            type="file"
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={handleBodyUpload}
-          />
-        </label>
+        <div style={{ margin: "20px 0" }}>
+          <label
+            style={{
+              background: "#444",
+              color: "#fff",
+              padding: "10px 20px",
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+          >
+            📸 Carregar corpo
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleBodyUpload}
+            />
+          </label>
+        </div>
       )}
 
       {bodyImage && (
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: 20,
-            width: "100%",
-          }}
-        >
-          {/* Canvas principal */}
+        <div style={{ display: "flex", gap: 20 }}>
           <div
-            style={{
-              flex: "1 1 400px",
-              background: "#ccc",
-              borderRadius: 10,
-              padding: 10,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
+            style={{ flex: 1, background: "#ccc", borderRadius: 10, padding: 10 }}
           >
             <Stage
-              width={stageSize.width}
-              height={stageSize.height}
+              width={500}
+              height={600}
               ref={stageRef}
-              style={{ maxWidth: "100%", borderRadius: 10 }}
+              style={{ background: "#ddd" }}
             >
               <Layer>
-                <BodyImage imageURL={bodyImage} stageSize={stageSize} />
+                <BodyImage imageURL={bodyImage} />
+
                 {tattoos.map((src, i) => (
                   <DraggableTattoo
                     key={i}
@@ -221,27 +172,22 @@ export default function TattooOverlay() {
             </Stage>
           </div>
 
-          {/* Painel lateral de controles */}
           {selectedIndex !== null && (
             <div
               style={{
-                width: 240,
-                background: "#f9f9f9",
+                width: 220,
+                background: "#eee",
                 borderRadius: 10,
-                padding: 15,
-                boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
+                padding: 10,
               }}
             >
               <h4>🛠 Ajustes</h4>
 
               <label>
-                Zoom ({controls.scale.toFixed(2)})
+                Zoom
                 <input
                   type="range"
-                  min="0.3"
+                  min="0.5"
                   max="2"
                   step="0.05"
                   value={controls.scale}
@@ -252,7 +198,7 @@ export default function TattooOverlay() {
               </label>
 
               <label>
-                Rotação ({controls.rotation}°)
+                Rotação
                 <input
                   type="range"
                   min="0"
@@ -266,7 +212,7 @@ export default function TattooOverlay() {
               </label>
 
               <label>
-                Transparência ({Math.round(controls.opacity * 100)}%)
+                Transparência
                 <input
                   type="range"
                   min="0.2"
@@ -279,49 +225,16 @@ export default function TattooOverlay() {
                 />
               </label>
 
-              <button
-                onClick={handleDeleteTattoo}
-                style={{
-                  background: "#ff4444",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: 8,
-                  padding: "8px 10px",
-                  cursor: "pointer",
-                }}
-              >
-                🗑 Remover
-              </button>
-
-              <button
-                onClick={handleSaveImage}
-                style={{
-                  background: "#2ecc71",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: 8,
-                  padding: "8px 10px",
-                  cursor: "pointer",
-                }}
-              >
-                💾 Salvar
-              </button>
+              <button onClick={handleDeleteTattoo}>🗑 Remover</button>
+              <button onClick={handleSaveImage}>💾 Salvar</button>
             </div>
           )}
         </div>
       )}
 
-      {/* Grade de tatuagens disponíveis */}
       <div style={{ marginTop: 20 }}>
         <h4>Tatuagens disponíveis:</h4>
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 10,
-            justifyContent: "center",
-          }}
-        >
+        <div style={{ display: "flex", gap: 10 }}>
           {URL_TATTOOS.map((src, i) => (
             <img
               key={i}
@@ -332,7 +245,7 @@ export default function TattooOverlay() {
                 height: 80,
                 cursor: "pointer",
                 borderRadius: 8,
-                border: "2px solid #ddd",
+                background: "#fff",
               }}
               onClick={() => handleTattooClick(src)}
             />
