@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/provador/static/css/main.e6c13ad2.css",
+    "main.js": "/provador/static/js/main.b5015c36.js",
+    "static/js/453.ae637da7.chunk.js": "/provador/static/js/453.ae637da7.chunk.js",
+    "index.html": "/provador/index.html",
+    "main.e6c13ad2.css.map": "/provador/static/css/main.e6c13ad2.css.map",
+    "main.b5015c36.js.map": "/provador/static/js/main.b5015c36.js.map",
+    "453.ae637da7.chunk.js.map": "/provador/static/js/453.ae637da7.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e6c13ad2.css",
+    "static/js/main.b5015c36.js"
+  ]
+}
